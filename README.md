@@ -25,7 +25,7 @@ float humidity;
 
 ...
 // get the results and do something with them
-if (ccs811_read_data (sensor, &temperature, &humidity))
+if (hdc1080_read(sensor, &temperature, &humidity))
 {
     ...
 }
@@ -47,7 +47,7 @@ Following figure shows the hardware configuration for ESP8266 and ESP32 if no in
   |                  |       |         |
   |    GPIO 14 (SCL) >-------> SCL     |
   |    GPIO 13 (SDA) <-------> SDA     |
-  |    GND           --------> /WAKE   |
+  |                  |       |         |
   +------------------+       +---------+
 ```
 
