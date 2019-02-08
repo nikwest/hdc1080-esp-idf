@@ -6,4 +6,5 @@
 
 sdkconfig*
 build
+.DS_Store
 
