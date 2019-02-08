@@ -92,8 +92,6 @@ xTaskCreate(user_task, "user_task", 256, NULL, 2, 0);
 
 **Please note:** To avoid concurrency situations when driver functions are used to access the sensor, for example to read data, the user task must not be created until the sensor configuration is completed.
 
-The user task can use different approaches to fetch new data. Either new data are fetched periodically or the interrupt signal *nINT* is used when new data are available or eCO2 value exceeds defined thresholds.
-
 If new data are fetched **periodically** the implementation of the user task is quite simply and could look like following.
 
 ```
@@ -124,10 +122,7 @@ The user task simply fetches new data with the same rate as the measurements are
 
 ```
 /**
- * Simple example with one sensor connected to I2C bus 0. It demonstrates the
- * different approaches to fetch the data. Either the interrupt *nINT* is used
- * whenever new data are available or exceed defined thresholds or the new
- * data are fetched periodically.
+ * Simple example with one sensor connected to I2C bus 0. 
  *
  * Harware configuration:
  *
@@ -140,13 +135,6 @@ The user task simply fetches new data with the same rate as the measurements are
  */
 
 /* -- use following constants to define the example mode ----------- */
-
-// #define INT_DATA_RDY_USED
-// #define INT_THRESHOLD_USED
-
-#if defined(INT_DATA_RDY_USED) || defined(INT_THRESHOLD_USED)
-#define INT_USED
-#endif
 
 /* -- includes ----------------------------------------------------- */
 

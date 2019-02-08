@@ -16,12 +16,6 @@
 
 /* -- use following constants to define the example mode ----------- */
 
-// #define INT_DATA_RDY_USED
-// #define INT_THRESHOLD_USED
-
-#if defined(INT_DATA_RDY_USED) || defined(INT_THRESHOLD_USED)
-#define INT_USED
-#endif
 
 /* -- includes ----------------------------------------------------- */
 
