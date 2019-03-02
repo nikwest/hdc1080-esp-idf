@@ -68,8 +68,10 @@ void user_task_periodic(void *pvParameters)
             printf("%.3f HDC1080 Sensor periodic: temperature %.2f degrees, humidity %.2f\n",
                    (double)sdk_system_get_time()*1e-3, temperature, humidity);
 
+        // printf("%.3f HDC1080 Sensor single: temperature %.2f degrees, humidity %.2f\n",
+        //            (double)sdk_system_get_time()*1e-3, hdc1080_get_temperature(sensor), hdc1080_get_humidity(sensor));
         // passive waiting until 1 second is over
-        vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
+       vTaskDelayUntil(&last_wakeup, 1000 / portTICK_PERIOD_MS);
     }
 }
 
@@ -91,10 +93,15 @@ void user_init(void)
 
     // init the sensor with slave address HDC1080_I2C_ADDR connected I2C_BUS.
     sensor = hdc1080_init_sensor (I2C_BUS, HDC1080_ADDR);
+    //hdc1080_set_resolution(sensor, hdc1080_8bit, hdc1080_8bit);
 
     if (sensor)
     {
-        printf("Initialized HDC1080 sensor: manufacurer %x, device id %x\n", hdc1080_get_manufacturer_id(sensor), hdc1080_get_device_id(sensor));
+        hdc1080_registers_t registers = hdc1080_get_registers(sensor);
+        printf("Initialized HDC1080 sensor: manufacurer 0x%x, device id 0x%x\n", hdc1080_get_manufacturer_id(sensor), hdc1080_get_device_id(sensor));
+        printf("Config: %x\n", registers.raw);
+        registers.acquisition_mode = 1;
+        hdc1080_set_registers(sensor, registers);
         // create a periodic task that uses the sensor
         xTaskCreate(user_task_periodic, "user_task_periodic", TASK_STACK_DEPTH, NULL, 2, NULL);
 

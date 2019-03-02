@@ -27,7 +27,6 @@ THE SOFTWARE.
 #include "hdc1080.h"
 
 
-#define	HDC1080_BOTH    		0x00
 #define	HDC1080_TEMPERATURE		0x00
 #define HDC1080_HUMIDITY		0x01
 #define HDC1080_CONFIGURATION	0x02
@@ -42,7 +41,7 @@ THE SOFTWARE.
 
 static bool _hdc1080_is_available (hdc1080_sensor_t* dev);
 static uint16_t _hdc1080_read(hdc1080_sensor_t* dev, uint8_t reg);
-static bool _hdc1080_read_data(hdc1080_sensor_t* dev, uint8_t reg, uint8_t* data, uint32_t len);
+static bool _hdc1080_read_data(hdc1080_sensor_t* dev, uint8_t reg, uint8_t* data, uint32_t len, TickType_t delay);
 
 
 hdc1080_sensor_t* hdc1080_init_sensor (uint8_t bus, uint8_t addr) {
@@ -111,12 +110,16 @@ float hdc1080_get_humidity(hdc1080_sensor_t* sensor) {
 }
 
 bool hdc1080_read(hdc1080_sensor_t* sensor, float* temperature, float* humidity) {
-    uint16_t raw[2];
-    if(!_hdc1080_read_data(sensor, HDC1080_BOTH, (uint8_t*) &raw, 2*sizeof(uint16_t))) {
+    uint8_t raw[4];
+    uint16_t result;
+    if(!_hdc1080_read_data(sensor, HDC1080_TEMPERATURE, (uint8_t*) &raw, 4, 20)) {
         return false;
     }
-    *temperature = RAW2TEMP(raw[0]);
-    *humidity = RAW2HUM(raw[1]);
+
+    result = raw[0]<<8 | raw[1];
+    *temperature = RAW2TEMP(result);
+    result = raw[2]<<8 | raw[3];
+    *humidity = RAW2HUM(result);
     return true;
 }
 
@@ -129,21 +132,21 @@ static bool _hdc1080_is_available(hdc1080_sensor_t* dev) {
 }
 
 static uint16_t _hdc1080_read(hdc1080_sensor_t* dev, uint8_t reg) {
-    uint16_t result;
-    if(!_hdc1080_read_data(dev, reg, (uint8_t*) &result, sizeof(result))) {
+    uint8_t result[2];
+    if(!_hdc1080_read_data(dev, reg, (uint8_t*) &result, 2, 10)) {
         return 0;
     }
-    return result;
+    return  (uint16_t) (result[0] <<8) | result[1];
 }
 
-static bool _hdc1080_read_data(hdc1080_sensor_t* dev, uint8_t reg, uint8_t* data, uint32_t len) {
+static bool _hdc1080_read_data(hdc1080_sensor_t* dev, uint8_t reg, uint8_t* data, uint32_t len, TickType_t delay) {
     if (!dev) return 0;
 
     if(i2c_slave_write(dev->bus, dev->address, &reg, NULL, 0)) {
         return false;
     }
 
-    vTaskDelay(15/portTICK_PERIOD_MS);
+    vTaskDelay(delay/portTICK_PERIOD_MS);
 
     if(i2c_slave_read(dev->bus, dev->address, NULL, data, len)) {
         return false;
