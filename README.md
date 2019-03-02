@@ -1,5 +1,3 @@
-# WARNING: driver has not been tested yet, as I'm still waiting to receive the hardware
-
 
 # Driver for the TI HDC1080 temperature and humidty sensor.
 
